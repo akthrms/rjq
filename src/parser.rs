@@ -48,6 +48,13 @@ fn parse_null(input: &str) -> IResult<&str, Filter> {
     Ok((input, filter))
 }
 
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
+enum Query {
+    Object(Vec<(String, Query)>),
+    Array(Vec<Query>),
+    Filter(Filter),
+}
+
 #[cfg(test)]
 mod tests {
     use crate::parser::{parse_filter, Filter};
