@@ -14,36 +14,36 @@ enum Filter {
 }
 
 fn parse_filter(input: &str) -> IResult<&str, Filter> {
-    let parse_filters = alt((parse_field, parse_index, parse_null));
+    let parse_filters = alt((parse_f_field, parse_f_index, parse_f_null));
     let (input, (_, filter, _)) = tuple((tag("."), parse_filters, eof))(input)?;
     Ok((input, filter))
 }
 
-fn parse_filter_rec(input: &str) -> IResult<&str, Filter> {
-    fn parse_field_with_dot(input: &str) -> IResult<&str, Filter> {
-        let (input, (_, filter)) = tuple((tag("."), parse_field))(input)?;
+fn parse_f_rec(input: &str) -> IResult<&str, Filter> {
+    fn parse_f_field_with_dot(input: &str) -> IResult<&str, Filter> {
+        let (input, (_, filter)) = tuple((tag("."), parse_f_field))(input)?;
         Ok((input, filter))
     }
 
-    let (input, filter) = alt((parse_field_with_dot, parse_index, parse_null))(input)?;
+    let (input, filter) = alt((parse_f_field_with_dot, parse_f_index, parse_f_null))(input)?;
     Ok((input, filter))
 }
 
-fn parse_field(input: &str) -> IResult<&str, Filter> {
+fn parse_f_field(input: &str) -> IResult<&str, Filter> {
     let parse_word = recognize(many1(alt((alphanumeric1, tag("-"), tag("_")))));
-    let (input, (word, filter)) = tuple((parse_word, parse_filter_rec))(input)?;
+    let (input, (word, filter)) = tuple((parse_word, parse_f_rec))(input)?;
     let filter = Filter::Field(word.to_string(), Box::new(filter));
     Ok((input, filter))
 }
 
-fn parse_index(input: &str) -> IResult<&str, Filter> {
+fn parse_f_index(input: &str) -> IResult<&str, Filter> {
     let parse_digit = delimited(tag("["), digit1, tag("]"));
-    let (input, (digit, filter)) = tuple((parse_digit, parse_filter_rec))(input)?;
+    let (input, (digit, filter)) = tuple((parse_digit, parse_f_rec))(input)?;
     let filter = Filter::Index(digit.parse().unwrap(), Box::new(filter));
     Ok((input, filter))
 }
 
-fn parse_null(input: &str) -> IResult<&str, Filter> {
+fn parse_f_null(input: &str) -> IResult<&str, Filter> {
     let filter = Filter::Null;
     Ok((input, filter))
 }
@@ -53,6 +53,19 @@ enum Query {
     Object(Vec<(String, Query)>),
     Array(Vec<Query>),
     Filter(Filter),
+}
+
+fn parse_q_object(input: &str) -> IResult<&str, Query> {
+    unimplemented!();
+}
+
+fn parse_q_array(input: &str) -> IResult<&str, Query> {
+    unimplemented!();
+}
+
+fn parse_q_filter(input: &str) -> IResult<&str, Query> {
+    let (input, filter) = parse_filter(input)?;
+    Ok((input, Query::Filter(filter)))
 }
 
 #[cfg(test)]
