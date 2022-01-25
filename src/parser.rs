@@ -55,6 +55,10 @@ enum Query {
     Filter(Filter),
 }
 
+fn parse_query(input: &str) -> IResult<&str, Query> {
+    unimplemented!();
+}
+
 fn parse_q_object(input: &str) -> IResult<&str, Query> {
     unimplemented!();
 }
@@ -73,12 +77,12 @@ mod tests {
     use crate::parser::{parse_filter, Filter};
 
     #[test]
-    fn test_parse1() {
+    fn test_parse_filter1() {
         assert_eq!(parse_filter("."), Ok(("", Filter::Null)));
     }
 
     #[test]
-    fn test_parse2() {
+    fn test_parse_filter2() {
         assert_eq!(
             parse_filter(".[0]"),
             Ok(("", Filter::Index(0, Box::new(Filter::Null))))
@@ -86,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse3() {
+    fn test_parse_filter3() {
         assert_eq!(
             parse_filter(".fieldName"),
             Ok((
@@ -97,7 +101,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse4() {
+    fn test_parse_filter4() {
         assert_eq!(
             parse_filter(".[0].fieldName"),
             Ok((
@@ -114,7 +118,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse5() {
+    fn test_parse_filter5() {
         assert_eq!(
             parse_filter(".fieldName[0]"),
             Ok((
