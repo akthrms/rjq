@@ -74,7 +74,7 @@ fn parse_q_filter(input: &str) -> IResult<&str, Query> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::{parse_filter, Filter};
+    use crate::parser::{parse_filter, parse_query, Filter, Query};
 
     #[test]
     fn test_parse_filter1() {
@@ -127,6 +127,39 @@ mod tests {
                     "fieldName".to_string(),
                     Box::new(Filter::Index(0, Box::new(Filter::Null)))
                 )
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_query1() {
+        assert_eq!(parse_query("[]"), Ok(("", Query::Array(vec![]))));
+    }
+
+    #[test]
+    fn test_parse_query2() {
+        assert_eq!(
+            parse_query("[.hoge,.piyo]"),
+            Ok((
+                "",
+                Query::Array(vec![
+                    Query::Filter(Filter::Field("hoge".to_string(), Box::new(Filter::Null))),
+                    Query::Filter(Filter::Field("piyo".to_string(), Box::new(Filter::Null)))
+                ])
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_query3() {
+        assert_eq!(
+            parse_query("{\"hoge\":[],\"piyo\":[]}]"),
+            Ok((
+                "",
+                Query::Object(vec![
+                    ("hoge".to_string(), Query::Array(vec![])),
+                    ("piyo".to_string(), Query::Array(vec![]))
+                ])
             ))
         );
     }
