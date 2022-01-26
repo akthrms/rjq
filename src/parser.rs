@@ -2,7 +2,7 @@ use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::{alphanumeric1, digit1};
 use nom::combinator::{eof, recognize};
-use nom::multi::many1;
+use nom::multi::{many1, separated_list0};
 use nom::sequence::{delimited, tuple};
 use nom::IResult;
 
@@ -14,8 +14,12 @@ enum Filter {
 }
 
 fn parse_filter(input: &str) -> IResult<&str, Filter> {
-    let parse_filters = alt((parse_f_field, parse_f_index, parse_f_null));
-    let (input, (_, filter, _)) = tuple((tag("."), parse_filters, eof))(input)?;
+    let (input, (_, filter, _)) = tuple((tag("."), choice_filter, eof))(input)?;
+    Ok((input, filter))
+}
+
+fn choice_filter(input: &str) -> IResult<&str, Filter> {
+    let (input, filter) = alt((parse_f_field, parse_f_index, parse_f_null))(input)?;
     Ok((input, filter))
 }
 
@@ -56,11 +60,13 @@ enum Query {
 }
 
 fn parse_query(input: &str) -> IResult<&str, Query> {
-    unimplemented!();
+    let (input, (query, _)) = tuple((choice_query, eof))(input)?;
+    Ok((input, query))
 }
 
-fn parse_query_rec(input: &str) -> IResult<&str, Query> {
-    unimplemented!();
+fn choice_query(input: &str) -> IResult<&str, Query> {
+    let (input, query) = alt((parse_q_array, parse_q_filter))(input)?;
+    Ok((input, query))
 }
 
 fn parse_q_object(input: &str) -> IResult<&str, Query> {
@@ -68,10 +74,18 @@ fn parse_q_object(input: &str) -> IResult<&str, Query> {
 }
 
 fn parse_q_array(input: &str) -> IResult<&str, Query> {
-    unimplemented!();
+    let parse_array = separated_list0(tag(","), choice_query);
+    let (input, queries) = delimited(tag("["), parse_array, tag("]"))(input)?;
+    let query = Query::Array(queries);
+    Ok((input, query))
 }
 
 fn parse_q_filter(input: &str) -> IResult<&str, Query> {
+    fn parse_filter(input: &str) -> IResult<&str, Filter> {
+        let (input, (_, filter)) = tuple((tag("."), choice_filter))(input)?;
+        Ok((input, filter))
+    }
+
     let (input, filter) = parse_filter(input)?;
     let query = Query::Filter(filter);
     Ok((input, query))
