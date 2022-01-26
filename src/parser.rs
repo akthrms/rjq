@@ -59,6 +59,10 @@ fn parse_query(input: &str) -> IResult<&str, Query> {
     unimplemented!();
 }
 
+fn parse_query_rec(input: &str) -> IResult<&str, Query> {
+    unimplemented!();
+}
+
 fn parse_q_object(input: &str) -> IResult<&str, Query> {
     unimplemented!();
 }
@@ -69,7 +73,8 @@ fn parse_q_array(input: &str) -> IResult<&str, Query> {
 
 fn parse_q_filter(input: &str) -> IResult<&str, Query> {
     let (input, filter) = parse_filter(input)?;
-    Ok((input, Query::Filter(filter)))
+    let query = Query::Filter(filter);
+    Ok((input, query))
 }
 
 #[cfg(test)]
