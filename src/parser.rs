@@ -65,12 +65,31 @@ fn parse_query(input: &str) -> IResult<&str, Query> {
 }
 
 fn choice_query(input: &str) -> IResult<&str, Query> {
-    let (input, query) = alt((parse_q_array, parse_q_filter))(input)?;
+    let (input, query) = alt((parse_q_object, parse_q_array, parse_q_filter))(input)?;
     Ok((input, query))
 }
 
 fn parse_q_object(input: &str) -> IResult<&str, Query> {
-    unimplemented!();
+    fn parse_key_value(input: &str) -> IResult<&str, (String, Query)> {
+        fn parse_key(input: &str) -> IResult<&str, &str> {
+            let parse_word = recognize(many1(alt((alphanumeric1, tag("-"), tag("_")))));
+            let (input, key) = delimited(tag("\""), parse_word, tag("\""))(input)?;
+            Ok((input, key))
+        }
+
+        fn parse_value(input: &str) -> IResult<&str, Query> {
+            let (input, (_, value)) = tuple((tag(":"), choice_query))(input)?;
+            Ok((input, value))
+        }
+
+        let (input, (key, value)) = tuple((parse_key, parse_value))(input)?;
+        Ok((input, (key.to_string(), value)))
+    }
+
+    let parse_object = separated_list0(tag(","), parse_key_value);
+    let (input, object) = delimited(tag("{"), parse_object, tag("}"))(input)?;
+    let query = Query::Object(object);
+    Ok((input, query))
 }
 
 fn parse_q_array(input: &str) -> IResult<&str, Query> {
@@ -172,7 +191,7 @@ mod tests {
     #[test]
     fn test_parse_query3() {
         assert_eq!(
-            parse_query("{\"hoge\":[],\"piyo\":[]}]"),
+            parse_query("{\"hoge\":[],\"piyo\":[]}"),
             Ok((
                 "",
                 Query::Object(vec![
