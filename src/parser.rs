@@ -53,13 +53,13 @@ fn parse_f_null(input: &str) -> IResult<&str, Filter> {
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
-enum Query {
+pub enum Query {
     Object(Vec<(String, Query)>),
     Array(Vec<Query>),
     Filter(Filter),
 }
 
-fn parse_query(input: &str) -> IResult<&str, Query> {
+pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, (query, _)) = tuple((choice_query, eof))(input)?;
     Ok((input, query))
 }
