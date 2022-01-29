@@ -130,10 +130,10 @@ mod tests {
     #[test]
     fn test_parse_filter3() {
         assert_eq!(
-            parse_filter(".fieldName"),
+            parse_filter(".hoge"),
             Ok((
                 "",
-                Filter::Field("fieldName".to_string(), Box::new(Filter::Null))
+                Filter::Field("hoge".to_string(), Box::new(Filter::Null))
             ))
         );
     }
@@ -141,15 +141,12 @@ mod tests {
     #[test]
     fn test_parse_filter4() {
         assert_eq!(
-            parse_filter(".[0].fieldName"),
+            parse_filter(".[0].hoge"),
             Ok((
                 "",
                 Filter::Index(
                     0,
-                    Box::new(Filter::Field(
-                        "fieldName".to_string(),
-                        Box::new(Filter::Null)
-                    ))
+                    Box::new(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
                 )
             ))
         );
@@ -158,11 +155,11 @@ mod tests {
     #[test]
     fn test_parse_filter5() {
         assert_eq!(
-            parse_filter(".fieldName[0]"),
+            parse_filter(".hoge[0]"),
             Ok((
                 "",
                 Filter::Field(
-                    "fieldName".to_string(),
+                    "hoge".to_string(),
                     Box::new(Filter::Index(0, Box::new(Filter::Null)))
                 )
             ))
