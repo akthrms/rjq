@@ -13,7 +13,7 @@ pub enum Filter {
     Null,
 }
 
-fn parse_filter(input: &str) -> IResult<&str, Filter> {
+pub fn parse_filter(input: &str) -> IResult<&str, Filter> {
     let (input, (_, filter, _)) = tuple((tag("."), choice_filter, eof))(input)?;
     Ok((input, filter))
 }
