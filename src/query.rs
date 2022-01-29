@@ -22,7 +22,11 @@ fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
 }
 
 fn execute_query(query: Query, value: Value) -> Result<Value, String> {
-    unimplemented!();
+    match (query, value) {
+        (Query::Object(object), value) => unimplemented!(),
+        (Query::Array(array), value) => unimplemented!(),
+        (Query::Filter(filter), value) => apply_filter(filter, value),
+    }
 }
 
 #[cfg(test)]
