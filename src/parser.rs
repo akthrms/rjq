@@ -7,7 +7,7 @@ use nom::sequence::{delimited, tuple};
 use nom::IResult;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
-enum Filter {
+pub enum Filter {
     Field(String, Box<Filter>),
     Index(usize, Box<Filter>),
     Null,
