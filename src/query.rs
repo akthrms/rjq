@@ -1,5 +1,5 @@
 use crate::parser::{Filter, Query};
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
     match (filter, value) {
@@ -23,7 +23,13 @@ fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
 
 fn execute_query(query: Query, value: Value) -> Result<Value, String> {
     match (query, value) {
-        (Query::Object(object), value) => unimplemented!(),
+        (Query::Object(object), value) => {
+            let mut values = Map::new();
+            for (field, query) in object {
+                values.insert(field, execute_query(query, value.clone())?);
+            }
+            Ok(Value::Object(values))
+        }
 
         (Query::Array(array), value) => {
             let mut values = vec![];
