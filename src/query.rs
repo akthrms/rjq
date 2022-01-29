@@ -24,7 +24,15 @@ fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
 fn execute_query(query: Query, value: Value) -> Result<Value, String> {
     match (query, value) {
         (Query::Object(object), value) => unimplemented!(),
-        (Query::Array(array), value) => unimplemented!(),
+
+        (Query::Array(array), value) => {
+            let mut values = vec![];
+            for query in array {
+                values.push(execute_query(query, value.clone())?);
+            }
+            Ok(Value::Array(values))
+        }
+
         (Query::Filter(filter), value) => apply_filter(filter, value),
     }
 }
@@ -146,7 +154,7 @@ mod tests {
     fn execute_query_test2() {
         assert_eq!(
             execute_query(
-                unsafe_parse_query("{\"field1\": ., \"field2\": .string-field}"),
+                unsafe_parse_query("{\"field1\":.,\"field2\":.string-field}"),
                 test_json()
             )
             .unwrap(),
@@ -161,7 +169,7 @@ mod tests {
     fn execute_query_test3() {
         assert_eq!(
             execute_query(
-                unsafe_parse_query("[.string-field, .nested-field.inner-string]"),
+                unsafe_parse_query("[.string-field,.nested-field.inner-string]"),
                 test_json()
             )
             .unwrap(),
