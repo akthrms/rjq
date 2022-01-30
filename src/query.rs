@@ -17,7 +17,7 @@ fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
 
         (Filter::Null, value) => Ok(value),
 
-        (filter, value) => Err(format!("unexpected pattern: {:?}: {:?}", filter, value)),
+        (filter, value) => Err(format!("invalid pattern: {:?}: {:?}", filter, value)),
     }
 }
 
