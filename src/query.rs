@@ -21,7 +21,7 @@ fn apply_filter(filter: Filter, value: Value) -> Result<Value, String> {
     }
 }
 
-fn execute_query(query: Query, value: Value) -> Result<Value, String> {
+pub fn execute_query(query: Query, value: Value) -> Result<Value, String> {
     match (query, value) {
         (Query::Object(object), value) => {
             let mut values = Map::new();
@@ -67,17 +67,11 @@ mod tests {
     }
 
     fn unsafe_parse_filter(input: &str) -> Filter {
-        match parse_filter(input) {
-            Ok((_, filter)) => filter,
-            _ => panic!(),
-        }
+        parse_filter(input).unwrap()
     }
 
     fn unsafe_parse_query(input: &str) -> Query {
-        match parse_query(input) {
-            Ok((_, query)) => query,
-            _ => panic!(),
-        }
+        parse_query(input).unwrap()
     }
 
     #[test]

@@ -1,4 +1,4 @@
 extern crate core;
 
-mod parser;
-mod query;
+pub mod parser;
+pub mod query;

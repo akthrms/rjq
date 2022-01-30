@@ -13,9 +13,10 @@ pub enum Filter {
     Null,
 }
 
-pub fn parse_filter(input: &str) -> IResult<&str, Filter> {
-    let (input, (_, filter, _)) = tuple((tag("."), choice_filter, eof))(input)?;
-    Ok((input, filter))
+pub fn parse_filter(input: &str) -> Result<Filter, String> {
+    tuple((tag("."), choice_filter, eof))(input)
+        .map(|(_, (_, filter, _))| filter)
+        .map_err(|_| format!("invalid filter format: {}", input)) // TODO: detail error message
 }
 
 fn choice_filter(input: &str) -> IResult<&str, Filter> {
@@ -59,9 +60,10 @@ pub enum Query {
     Filter(Filter),
 }
 
-pub fn parse_query(input: &str) -> IResult<&str, Query> {
-    let (input, (query, _)) = tuple((choice_query, eof))(input)?;
-    Ok((input, query))
+pub fn parse_query(input: &str) -> Result<Query, String> {
+    tuple((choice_query, eof))(input)
+        .map(|(_, (filter, _))| filter)
+        .map_err(|_| format!("invalid query format: {}", input)) // TODO: detail error message
 }
 
 fn choice_query(input: &str) -> IResult<&str, Query> {
@@ -116,14 +118,14 @@ mod tests {
 
     #[test]
     fn test_parse_filter1() {
-        assert_eq!(parse_filter("."), Ok(("", Filter::Null)));
+        assert_eq!(parse_filter("."), Ok(Filter::Null));
     }
 
     #[test]
     fn test_parse_filter2() {
         assert_eq!(
             parse_filter(".[0]"),
-            Ok(("", Filter::Index(0, Box::new(Filter::Null))))
+            Ok(Filter::Index(0, Box::new(Filter::Null)))
         );
     }
 
@@ -131,10 +133,7 @@ mod tests {
     fn test_parse_filter3() {
         assert_eq!(
             parse_filter(".hoge"),
-            Ok((
-                "",
-                Filter::Field("hoge".to_string(), Box::new(Filter::Null))
-            ))
+            Ok(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
         );
     }
 
@@ -142,12 +141,9 @@ mod tests {
     fn test_parse_filter4() {
         assert_eq!(
             parse_filter(".[0].hoge"),
-            Ok((
-                "",
-                Filter::Index(
-                    0,
-                    Box::new(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
-                )
+            Ok(Filter::Index(
+                0,
+                Box::new(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
             ))
         );
     }
@@ -156,32 +152,26 @@ mod tests {
     fn test_parse_filter5() {
         assert_eq!(
             parse_filter(".hoge[0]"),
-            Ok((
-                "",
-                Filter::Field(
-                    "hoge".to_string(),
-                    Box::new(Filter::Index(0, Box::new(Filter::Null)))
-                )
+            Ok(Filter::Field(
+                "hoge".to_string(),
+                Box::new(Filter::Index(0, Box::new(Filter::Null)))
             ))
         );
     }
 
     #[test]
     fn test_parse_query1() {
-        assert_eq!(parse_query("[]"), Ok(("", Query::Array(vec![]))));
+        assert_eq!(parse_query("[]"), Ok(Query::Array(vec![])));
     }
 
     #[test]
     fn test_parse_query2() {
         assert_eq!(
             parse_query("[.hoge,.piyo]"),
-            Ok((
-                "",
-                Query::Array(vec![
-                    Query::Filter(Filter::Field("hoge".to_string(), Box::new(Filter::Null))),
-                    Query::Filter(Filter::Field("piyo".to_string(), Box::new(Filter::Null)))
-                ])
-            ))
+            Ok(Query::Array(vec![
+                Query::Filter(Filter::Field("hoge".to_string(), Box::new(Filter::Null))),
+                Query::Filter(Filter::Field("piyo".to_string(), Box::new(Filter::Null)))
+            ]))
         );
     }
 
@@ -189,13 +179,10 @@ mod tests {
     fn test_parse_query3() {
         assert_eq!(
             parse_query("{\"hoge\":[],\"piyo\":[]}"),
-            Ok((
-                "",
-                Query::Object(vec![
-                    ("hoge".to_string(), Query::Array(vec![])),
-                    ("piyo".to_string(), Query::Array(vec![]))
-                ])
-            ))
+            Ok(Query::Object(vec![
+                ("hoge".to_string(), Query::Array(vec![])),
+                ("piyo".to_string(), Query::Array(vec![]))
+            ]))
         );
     }
 }
