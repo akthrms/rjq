@@ -1,0 +1,14 @@
+{
+  "string-field": "string value",
+  "nested-field": {
+    "inner-string": "inner value",
+    "inner-number": 100
+  },
+  "array-field": [
+    "first field",
+    "next field",
+    {
+      "object-in-array": "string value in object-in-array"
+    }
+  ]
+}
