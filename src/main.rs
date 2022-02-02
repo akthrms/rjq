@@ -1,8 +1,24 @@
 use rjq::parser::parse_query;
 use rjq::query::execute_query;
+use std::env;
+use std::fs;
 
 fn main() {
-    println!("Hello, world!");
+    let args = env::args().collect::<Vec<String>>();
+
+    if args.len() == 3 {
+        match rjq(
+            fs::read_to_string(&args[2])
+                .expect("invalid file path")
+                .as_str(),
+            &args[1],
+        ) {
+            Ok(s) => println!("{}", s),
+            Err(e) => panic!("{}", e),
+        }
+    } else {
+        panic!("invalid arguments")
+    }
 }
 
 fn rjq(json_string: &str, query_string: &str) -> Result<String, String> {
