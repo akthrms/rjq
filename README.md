@@ -2,7 +2,14 @@
 
 simple `jq` command by Rust.
 
-*TODO*
+## Usage
+
+```sh
+$ cargo run "{\"field1\":.,\"field2\":.string-field}" data/example.json
+    Finished dev [unoptimized + debuginfo] target(s) in 0.06s
+     Running `target/debug/rjq '{"field1":.,"field2":.string-field}' data/example.json`
+{"field1":{"array-field":["first field","next field",{"object-in-array":"string value in object-in-array"}],"nested-field":{"inner-number":100,"inner-string":"inner value"},"string-field":"string value"},"field2":"string value"}
+```
 
 ## Note
 
