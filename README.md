@@ -11,7 +11,7 @@ $ cargo build --release
 ## Usage
 
 ```sh
-$ cat data/example.json | target/release/rjq "{\"field1\":.,\"field2\":.string-field}"
+$ cat data/example.json | target/release/rjq "{\"field1\": ., \"field2\": .string-field}"
 {
   "field1": {
     "array-field": [
@@ -32,7 +32,7 @@ $ cat data/example.json | target/release/rjq "{\"field1\":.,\"field2\":.string-f
 ```
 
 ```sh
-$ target/release/rjq "[.string-field,.nested-field.inner-string]" data/example.json
+$ target/release/rjq "[.string-field, .nested-field.inner-string]" data/example.json
 [
   "string value",
   "inner value"
@@ -42,7 +42,7 @@ $ target/release/rjq "[.string-field,.nested-field.inner-string]" data/example.j
 ## TO DO
 
 - [ ] help
-- [ ] whitespace
+- [x] whitespace
 
 ## Note
 

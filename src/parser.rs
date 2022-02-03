@@ -171,6 +171,49 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_filter_spaces1() {
+        assert_eq!(parse_filter(" . "), Ok(Filter::Null));
+    }
+
+    #[test]
+    fn test_parse_filter_spaces2() {
+        assert_eq!(
+            parse_filter(" . [ 0 ] "),
+            Ok(Filter::Index(0, Box::new(Filter::Null)))
+        );
+    }
+
+    #[test]
+    fn test_parse_filter_spaces3() {
+        assert_eq!(
+            parse_filter(" . hoge "),
+            Ok(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
+        );
+    }
+
+    #[test]
+    fn test_parse_filter_spaces4() {
+        assert_eq!(
+            parse_filter(" . [ 0 ] . hoge "),
+            Ok(Filter::Index(
+                0,
+                Box::new(Filter::Field("hoge".to_string(), Box::new(Filter::Null)))
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_filter_spaces5() {
+        assert_eq!(
+            parse_filter(" . hoge [ 0 ] "),
+            Ok(Filter::Field(
+                "hoge".to_string(),
+                Box::new(Filter::Index(0, Box::new(Filter::Null)))
+            ))
+        );
+    }
+
+    #[test]
     fn test_parse_query1() {
         assert_eq!(parse_query("[]"), Ok(Query::Array(vec![])));
     }
@@ -190,6 +233,33 @@ mod tests {
     fn test_parse_query3() {
         assert_eq!(
             parse_query("{\"hoge\":[],\"piyo\":[]}"),
+            Ok(Query::Object(vec![
+                ("hoge".to_string(), Query::Array(vec![])),
+                ("piyo".to_string(), Query::Array(vec![]))
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_parse_query_spaces1() {
+        assert_eq!(parse_query(" [ ] "), Ok(Query::Array(vec![])));
+    }
+
+    #[test]
+    fn test_parse_query_spaces2() {
+        assert_eq!(
+            parse_query(" [ . hoge , . piyo ] "),
+            Ok(Query::Array(vec![
+                Query::Filter(Filter::Field("hoge".to_string(), Box::new(Filter::Null))),
+                Query::Filter(Filter::Field("piyo".to_string(), Box::new(Filter::Null)))
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_parse_query_spaces3() {
+        assert_eq!(
+            parse_query(" { \"hoge\" : [ ] , \"piyo\" : [ ] } "),
             Ok(Query::Object(vec![
                 ("hoge".to_string(), Query::Array(vec![])),
                 ("piyo".to_string(), Query::Array(vec![]))
