@@ -1,7 +1,7 @@
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::character::complete::{alphanumeric1, digit1};
-use nom::combinator::{eof, recognize};
+use nom::character::complete::{alphanumeric1, digit1, multispace0};
+use nom::combinator::eof;
 use nom::multi::{many1, separated_list0};
 use nom::sequence::{delimited, tuple};
 use nom::IResult;
@@ -14,7 +14,7 @@ pub enum Filter {
 }
 
 pub fn parse_filter(input: &str) -> Result<Filter, String> {
-    tuple((tag("."), choice_filter, eof))(input)
+    tuple((parse_tag("."), choice_filter, eof))(input)
         .map(|(_, (_, filter, _))| filter)
         .map_err(|_| format!("invalid filter format: {}", input)) // TODO: detail error message
 }
@@ -26,7 +26,7 @@ fn choice_filter(input: &str) -> IResult<&str, Filter> {
 
 fn parse_f_rec(input: &str) -> IResult<&str, Filter> {
     fn parse_f_field_with_dot(input: &str) -> IResult<&str, Filter> {
-        let (input, (_, filter)) = tuple((tag("."), parse_f_field))(input)?;
+        let (input, (_, filter)) = tuple((parse_tag("."), parse_f_field))(input)?;
         Ok((input, filter))
     }
 
@@ -35,14 +35,13 @@ fn parse_f_rec(input: &str) -> IResult<&str, Filter> {
 }
 
 fn parse_f_field(input: &str) -> IResult<&str, Filter> {
-    let parse_word = recognize(many1(alt((alphanumeric1, tag("-"), tag("_")))));
     let (input, (word, filter)) = tuple((parse_word, parse_f_rec))(input)?;
-    let filter = Filter::Field(word.to_string(), Box::new(filter));
+    let filter = Filter::Field(word, Box::new(filter));
     Ok((input, filter))
 }
 
 fn parse_f_index(input: &str) -> IResult<&str, Filter> {
-    let parse_digit = delimited(tag("["), digit1, tag("]"));
+    let parse_digit = delimited(parse_tag("["), digit1, parse_tag("]"));
     let (input, (digit, filter)) = tuple((parse_digit, parse_f_rec))(input)?;
     let filter = Filter::Index(digit.parse().unwrap(), Box::new(filter));
     Ok((input, filter))
@@ -73,43 +72,55 @@ fn choice_query(input: &str) -> IResult<&str, Query> {
 
 fn parse_q_object(input: &str) -> IResult<&str, Query> {
     fn parse_key_value(input: &str) -> IResult<&str, (String, Query)> {
-        fn parse_key(input: &str) -> IResult<&str, &str> {
-            let parse_word = recognize(many1(alt((alphanumeric1, tag("-"), tag("_")))));
-            let (input, key) = delimited(tag("\""), parse_word, tag("\""))(input)?;
+        fn parse_key(input: &str) -> IResult<&str, String> {
+            let (input, key) = delimited(parse_tag("\""), parse_word, parse_tag("\""))(input)?;
             Ok((input, key))
         }
 
         fn parse_value(input: &str) -> IResult<&str, Query> {
-            let (input, (_, value)) = tuple((tag(":"), choice_query))(input)?;
+            let (input, (_, value)) = tuple((parse_tag(":"), choice_query))(input)?;
             Ok((input, value))
         }
 
         let (input, (key, value)) = tuple((parse_key, parse_value))(input)?;
-        Ok((input, (key.to_string(), value)))
+        Ok((input, (key, value)))
     }
 
-    let parse_object = separated_list0(tag(","), parse_key_value);
-    let (input, object) = delimited(tag("{"), parse_object, tag("}"))(input)?;
+    let parse_object = separated_list0(parse_tag(","), parse_key_value);
+    let (input, object) = delimited(parse_tag("{"), parse_object, parse_tag("}"))(input)?;
     let query = Query::Object(object);
     Ok((input, query))
 }
 
 fn parse_q_array(input: &str) -> IResult<&str, Query> {
-    let parse_array = separated_list0(tag(","), choice_query);
-    let (input, queries) = delimited(tag("["), parse_array, tag("]"))(input)?;
+    let parse_array = separated_list0(parse_tag(","), choice_query);
+    let (input, queries) = delimited(parse_tag("["), parse_array, parse_tag("]"))(input)?;
     let query = Query::Array(queries);
     Ok((input, query))
 }
 
 fn parse_q_filter(input: &str) -> IResult<&str, Query> {
     fn parse_filter(input: &str) -> IResult<&str, Filter> {
-        let (input, (_, filter)) = tuple((tag("."), choice_filter))(input)?;
+        let (input, (_, filter)) = tuple((parse_tag("."), choice_filter))(input)?;
         Ok((input, filter))
     }
 
     let (input, filter) = parse_filter(input)?;
     let query = Query::Filter(filter);
     Ok((input, query))
+}
+
+fn parse_tag<'a>(input: &'a str) -> impl FnMut(&'a str) -> IResult<&'a str, &str> {
+    delimited(multispace0, tag(input), multispace0)
+}
+
+fn parse_word(input: &str) -> IResult<&str, String> {
+    let (input, words) = delimited(
+        multispace0,
+        many1(alt((alphanumeric1, tag("-"), tag("_")))),
+        multispace0,
+    )(input)?;
+    Ok((input, words.join("")))
 }
 
 #[cfg(test)]
