@@ -30,7 +30,11 @@ fn main() {
 fn rjq(json_string: &str, query_string: &str) -> Result<String, String> {
     let value = serde_json::from_str(json_string).expect("invalid json format");
     let query = parse_query(query_string)?;
-    execute_query(query, value).map(|value| value.to_string())
+
+    match execute_query(query, value) {
+        Ok(v) => serde_json::to_string_pretty(&v).map_err(|e| e.to_string()),
+        Err(e) => Err(e),
+    }
 }
 
 #[cfg(test)]
@@ -59,7 +63,7 @@ mod tests {
     fn rjq_test1() {
         assert_eq!(
             rjq(test_json().to_string().as_str(), "{}"),
-            Ok(json!({}).to_string())
+            Ok(serde_json::to_string_pretty(&json!({})).unwrap())
         )
     }
 
@@ -70,11 +74,11 @@ mod tests {
                 test_json().to_string().as_str(),
                 "{\"field1\":.,\"field2\":.string-field}"
             ),
-            Ok(json!({
+            Ok(serde_json::to_string_pretty(&json!({
                 "field1": test_json(),
                 "field2": test_json()["string-field"]
-            })
-            .to_string())
+            }))
+            .unwrap())
         )
     }
 
@@ -85,11 +89,11 @@ mod tests {
                 test_json().to_string().as_str(),
                 "[.string-field,.nested-field.inner-string]"
             ),
-            Ok(json!([
+            Ok(serde_json::to_string_pretty(&json!([
                 test_json()["string-field"],
                 test_json()["nested-field"]["inner-string"]
-            ])
-            .to_string())
+            ]))
+            .unwrap())
         )
     }
 }
