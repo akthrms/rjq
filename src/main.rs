@@ -2,22 +2,28 @@ use rjq::parser::parse_query;
 use rjq::query::execute_query;
 use std::env;
 use std::fs;
+use std::io;
+use std::io::Read;
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
 
+    let mut json_string;
+
     if args.len() == 3 {
-        match rjq(
-            fs::read_to_string(&args[2])
-                .expect("invalid file path")
-                .as_str(),
-            &args[1],
-        ) {
-            Ok(s) => println!("{}", s),
-            Err(e) => panic!("{}", e),
-        }
+        json_string = fs::read_to_string(&args[2]).expect("invalid file path");
+    } else if args.len() == 2 {
+        json_string = String::new();
+        io::stdin()
+            .read_to_string(&mut json_string)
+            .expect("invalid contents");
     } else {
         panic!("invalid arguments")
+    }
+
+    match rjq(json_string.as_str(), &args[1]) {
+        Ok(s) => println!("{}", s),
+        Err(e) => panic!("{}", e),
     }
 }
 
