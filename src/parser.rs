@@ -1,7 +1,7 @@
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::{alphanumeric1, digit1, multispace0};
-use nom::combinator::eof;
+use nom::combinator::{eof, recognize};
 use nom::multi::{many1, separated_list0};
 use nom::sequence::{delimited, tuple};
 use nom::IResult;
@@ -115,12 +115,12 @@ fn parse_tag<'a>(input: &'a str) -> impl FnMut(&'a str) -> IResult<&'a str, &str
 }
 
 fn parse_word(input: &str) -> IResult<&str, String> {
-    let (input, words) = delimited(
+    let (input, word) = delimited(
         multispace0,
-        many1(alt((alphanumeric1, tag("-"), tag("_")))),
+        recognize(many1(alt((alphanumeric1, tag("-"), tag("_"))))),
         multispace0,
     )(input)?;
-    Ok((input, words.join("")))
+    Ok((input, word.to_string()))
 }
 
 #[cfg(test)]
