@@ -6,8 +6,6 @@ simple `jq` command by Rust.
 
 ```sh
 $ cargo build --release
-   Compiling rjq v0.1.0 (/Users/akita/my-projects/rjq)
-    Finished release [optimized] target(s) in 2.05s
 
 $ cat data/example.json | target/release/rjq "{\"field1\":.,\"field2\":.string-field}"
 {
