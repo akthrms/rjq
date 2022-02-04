@@ -2,13 +2,13 @@
 
 simple `jq` command by Rust.
 
-## Build
+## Usage
 
 ```sh
-$ cargo build --release
+$ rjq query [filename]
 ```
 
-## Usage
+## Examples
 
 ```sh
 $ cat data/example.json | target/release/rjq "{\"field1\": ., \"field2\": .string-field}"
@@ -38,11 +38,6 @@ $ target/release/rjq "[.string-field, .nested-field.inner-string]" data/example.
   "inner value"
 ]
 ```
-
-## TO DO
-
-- [ ] help
-- [x] whitespace
 
 ## Note
 

@@ -18,7 +18,7 @@ fn main() {
             .read_to_string(&mut json_string)
             .expect("invalid contents");
     } else {
-        panic!("invalid arguments")
+        panic!("invalid arguments: rjq query [filename]")
     }
 
     match rjq(json_string.as_str(), &args[1]) {
