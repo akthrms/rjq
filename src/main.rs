@@ -1,27 +1,33 @@
+use clap::Parser;
 use rjq::parser::parse_query;
 use rjq::query::execute_query;
-use std::env;
 use std::fs;
 use std::io;
 use std::io::Read;
 
+#[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    query: String,
+    filename: Option<String>,
+}
+
 fn main() {
-    let args = env::args().collect::<Vec<String>>();
+    let args = Args::parse();
 
-    let mut json_string;
+    let query_string: String = args.query;
+    let json_string: String = args.filename.map_or_else(
+        || {
+            let mut input = String::new();
+            io::stdin()
+                .read_to_string(&mut input)
+                .expect("invalid contents");
+            input
+        },
+        |filename: String| fs::read_to_string(filename).expect("invalid file path"),
+    );
 
-    if args.len() == 3 {
-        json_string = fs::read_to_string(&args[2]).expect("invalid file path");
-    } else if args.len() == 2 {
-        json_string = String::new();
-        io::stdin()
-            .read_to_string(&mut json_string)
-            .expect("invalid contents");
-    } else {
-        panic!("invalid arguments: rjq query [filename]")
-    }
-
-    match rjq(json_string.as_str(), &args[1]) {
+    match rjq(json_string.as_str(), query_string.as_str()) {
         Ok(s) => println!("{}", s),
         Err(e) => panic!("{}", e),
     }

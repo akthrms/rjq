@@ -5,7 +5,20 @@ simple `jq` command by Rust.
 ## Usage
 
 ```sh
-$ rjq query [filename]
+$ target/release/rjq --help
+rjq 0.1.0
+simple jq command by Rust
+
+USAGE:
+    rjq <QUERY> [FILENAME]
+
+ARGS:
+    <QUERY>
+    <FILENAME>
+
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
 ```
 
 ## Examples
