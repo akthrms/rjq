@@ -1,20 +1,20 @@
 # rjq
 
-simple `jq` command by Rust.
+Simple `jq` command by Rust.
 
 ## Usage
 
 ```sh
 $ target/release/rjq --help
 rjq 0.1.0
-simple jq command by Rust
+Simple jq command by Rust.
 
 USAGE:
     rjq <QUERY> [FILENAME]
 
 ARGS:
-    <QUERY>
-    <FILENAME>
+    <QUERY>       Query to filter JSON
+    <FILENAME>    Target filename. If not, read JSON from pipe
 
 OPTIONS:
     -h, --help       Print help information

@@ -2,7 +2,7 @@
 name = "rjq"
 version = "0.1.0"
 edition = "2018"
-description = "simple jq command by Rust"
+description = "Simple jq command by Rust."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

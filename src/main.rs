@@ -8,7 +8,9 @@ use std::io::Read;
 #[derive(Debug, Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
+    /// Query to filter JSON.
     query: String,
+    /// Target filename. If not, read JSON from pipe.
     filename: Option<String>,
 }
 
