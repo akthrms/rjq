@@ -5,7 +5,7 @@ Simple `jq` command by Rust.
 ## Usage
 
 ```sh
-$ target/release/rjq --help
+$ rjq --help
 rjq 0.1.0
 Simple jq command by Rust.
 
@@ -24,7 +24,7 @@ OPTIONS:
 ## Examples
 
 ```sh
-$ cat data/example.json | target/release/rjq "{\"field1\": ., \"field2\": .string-field}"
+$ cat data/example.json | rjq "{\"field1\": ., \"field2\": .string-field}"
 {
   "field1": {
     "array-field": [
@@ -45,7 +45,7 @@ $ cat data/example.json | target/release/rjq "{\"field1\": ., \"field2\": .strin
 ```
 
 ```sh
-$ target/release/rjq "[.string-field, .nested-field.inner-string]" data/example.json
+$ rjq "[.string-field, .nested-field.inner-string]" data/example.json
 [
   "string value",
   "inner value"
